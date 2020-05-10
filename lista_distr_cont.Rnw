@@ -1,0 +1,982 @@
+\documentclass[a4paper,10pt]{article}
+\usepackage[brazilian]{babel}
+\usepackage{amsthm,amsfonts,bm,color,geometry}
+\usepackage{empheq,amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{indentfirst}
+\usepackage[pdftex]{hyperref} % com estes pacotes já podemos colorir o texto 
+\usepackage[utf8]{inputenc}
+\geometry{hmargin={2cm,2cm}}
+
+\title{Lista de Distribuições}
+\author{Guilherme Moraes Ferraudo} 
+\date{}
+\begin{document}
+\SweaveOpts{concordance=TRUE}
+\maketitle 
+
+Neste material apresentaremos os principais modelos para as variáveis aleatórias discretas e contínuas. Entretanto, o nosso foco maior serão
+os modelos contínuos. Os diversos modelos serão caracterizados pela sua função densidade e, em vários casos, apresentamos também a função
+de distribuição. Este material está baseado no livro de Magalhães (2006), nas notas técnicas de Pisani (1973), no material contido no link 
+{\href{http://zoonek2.free.fr/UNIX/48_R/07.html}{http://zoonek2.free.fr/UNIX/48\_R/07.html}} e na enciclopédia livre, \textit{Wikipedia}.
+
+Este documento foi gerado utilizando o Sweave, uma ferramenta que combina o ambiente R e o sistema LaTex{\href{https://miktex.org/}{https://miktex.org/}}. A versão do ambiente R utilizada é a 3.6.3.
+
+\section{Principais Modelos Discretos}
+\subsection{Modelo Bernoulli}
+Uma variável aleatória segue o modelo \textit{Bernoulli}, se assume apenas os valores 0 ou 1. Sua função de probabilidade é dada por:\\
+
+\begin{equation}
+p(1) = P(X = 1) = p
+\end{equation}
+
+\begin{equation}
+p(0) = P(X = 0) = 1-p 
+\end{equation}
+
+No modelo de Bernoulli, a probabilidade \textit{p} é denominada de parâmetro do modelo. É prática comum considerar como \textit{sucesso}
+a ocorrência de 1 e \textit{fracasso} a de 0. Assim, denominamos por \textit{ensaio de Bernoulli}, o experimento que tem resposta dicotômica
+do tipo sucesso-fracasso.\\
+
+\textbf{\textit{Notação: }} \textit{$X \sim  Bernoulli(p)$}
+
+\textbf{\textit{Aplicações: }}Qualquer experimento que tenha resposta dicotômica do tipo sucesso-fracasso. Por exemplo, o lançamento de uma moeda.
+
+<<bernoulli, echo = F, fig = T>>=
+n <- 100
+x <- sample(c(0,1), n, replace=T)
+plot(x, main="Variaveis Bernoulli", ylim = c(0,1), pch = 19)
+@
+
+\subsection{Modelo Binomial}
+
+Seja \textit{X} o número total de sucessos obtidos, na realização de \textit{n} ensaios de Bernoulli independentes. Diremos que \textit{X}
+segue o modelo \textit{Binomial} com parâmetros \textit{n} e \textit{p} e sua função de probabilidade é dada por:
+
+\begin{equation}
+P(X = x) = {n \choose x} p^x (1-p)^{n-x}, x = 0, 1, \ldots, n
+\end{equation}
+
+Como resultado dos \textit{n} experimentos, o evento \textit{A} pode ocorrer \textit{x} vezes para $x = 0, 1, \ldots, n$.\\
+
+\textbf{\textit{Notação: }} \textit{$X \sim  Bin(n,p)$}
+
+\textbf{\textit{Aplicações: }}Encontra-se essa distribuição em ecologia, quando você tenta estimar o número de animais de uma dada espécie 
+(digamos, peixe em um lago). Você pega o animal, você marca eles (com um anel), e após algum tempo, uma parte da população é capturada 
+(sabemos quantos, porque nós temos contado os anéis), o resto não é. Quando captamos novos animais, 
+temos um certo número de animais com anéis e um certo número de animais sem anéis. Assim, podemos usar esses números para estimar o 
+tamanho da população.
+
+<<binomial1, echo = F, fig = T>>=
+N <- 100000
+n1 <- 10
+p1 <- .5
+x1 <- rbinom(N,n1,p1)
+n2 <- 100
+p2 <- .9
+x2 <- rbinom(N,n2,p2)
+par(mfrow = c(1,2))
+hist(x1, 
+     xlim = c(min(x1), max(x1)), 
+     probability = TRUE, 
+     nclass = max(x1) - min(x1) + 1, 
+     col = 'lightblue',
+     main = 'Binomial, n=10, p=.5')
+lines(density(x1,bw=1), col = 'red', lwd = 3)
+hist(x2, 
+     xlim = c(min(x2), max(x2)), 
+     probability = TRUE, 
+     nclass = max(x2) - min(x2) + 1, 
+     col = 'lightblue',
+     main = 'Binomial, n=10, p=.9')
+lines(density(x2,bw=1), col = 'red', lwd = 3)
+@
+
+<<binomial2, echo = F, fig = T>>=
+N <- 100000
+n3 <- 100
+p3 <- .5
+x3 <- rbinom(N,n3,p3)
+n4 <- 100
+p4 <- .9
+x4 <- rbinom(N,n4,p4)
+par(mfrow = c(1,2))
+hist(x3, 
+     xlim = c(min(x3), max(x3)), 
+     probability = TRUE, 
+     nclass = max(x3) - min(x3) + 1, 
+     col = 'lightblue',
+     main = 'Binomial, n=100, p=.5')
+lines(density(x3,bw=1), col = 'red', lwd = 3)
+hist(x4, 
+     xlim = c(min(x4), max(x4)), 
+     probability = TRUE, 
+     nclass = max(x4) - min(x4) + 1, 
+     col = 'lightblue',
+     main = 'Binomial, n=100, p=.9')
+lines(density(x4,bw=1), col = 'red', lwd = 3)
+@
+
+\subsection{Modelo Poisson}
+
+Uma variável \textit{X} segue o modelo de \textit{Poisson} de parâmtero $\lambda, \lambda > 0$ se sua função de probabilidade for a seguinte:
+
+\begin{equation}
+P(X = k) = \frac{e^{-\lambda}\lambda^k}{k!}, k = 0, 1, \cdots.
+\end{equation}
+
+Como resultado dos \textit{n} experimentos, o evento \textit{A} pode ocorrer \textit{x} vezes para $x = 0, 1, \ldots, n$.\\
+
+\textbf{\textit{Notação: }} \textit{$X \sim  Poisson(\lambda)$}. O parâmetro $\lambda$ indica a taxa de ocorrência por unidade de medida.
+
+\textbf{\textit{Aplicações: }} O número de mensagens eletrônicas (em centenas) recebidas por um provedor em horário comercial foi modelado por uma variável Poisson.
+Feller (1968) nos dá um exemplo clássico e interessante da aplicação da distribuição de Poisson ocorreu durante a Segunda Guerra Mundial. 
+Durante a guerra, a cidade de Londres foi bombardeada intensamente pelos aviões alemães. A discussão sobre a aleatoriedade dos alvos é feita 
+com o auxílio da probabilidade e da estatística. Um possível interesse é saber se houve alguma tendência de concentrar as bombas em alguns 
+alvos, ou se elas foram lançadas aleatoriamente. 
+
+\textbf{\textit{Observação: }} A distribuição de Poisson possui a média igual a variância, ou seja, $E(X) = Var(X) = \lambda$.
+
+<<Poisson, echo = F, fig = T>>=
+N <- 10000
+x1 <- rpois(N, 3)
+x2 <- rpois(N, 20)
+par(mfrow = c(1,2))
+hist(x1, 
+     xlim=c(min(x1),max(x1)), probability=T, nclass=max(x1)-min(x1)+1, 
+     col='lightblue',
+     main='Poisson, lambda=3')
+lines(density(x1,bw=1), col='red', lwd=3)
+hist(x2, 
+     xlim=c(min(x2),max(x2)), probability=T, nclass=max(x2)-min(x2)+1, 
+     col='lightblue',
+     main='Poisson, lambda=20')
+lines(density(x2,bw=1), col='red', lwd=3)
+@
+
+\subsection{Outros modelos discretos}
+
+Além dos modelos mostrados acima, existem outros modelos discretos como, por exemplo:
+
+\begin{itemize}
+\item{Uniforme discreto;}
+\item{Geométrica;}
+\item{Hipergeométrica;}
+\item{Binomial negativa;}
+\item{Multinomial;}
+\end{itemize}
+
+\newpage
+\section{Principais Modelos Contínuos}
+
+Nesta seção iremos mostrar os principais modelos contínuos. São eles:
+
+\begin{itemize}
+\item{Uniforme contínuo;}
+\item{Exponencial;}
+\item{Normal;}
+\item{Log-Normal;}
+\item{Gama;}
+\item{Weibull;}
+\item{Qui-Quadrado($\chi^2$);}
+\item{t-Student;}
+\item{F-Snedecor;}
+\item{Beta;}
+\item{Erlang;}
+\item{Cauchy;}
+\item{Pareto;}
+\item{Rayleigh;}
+\end{itemize}
+
+\subsection{Modelo Uniforme contínuo}
+
+Uma variável aleatória (v.a.) com distribuição uniforme constitui o exemplo mais simples de v.a. contínua. Neste modelo
+pressupõe que os valores possíveis para a v.a. tem todos a mesma probabilidade de ocorrência.
+A sua função densidade de probabilidade $f(x)$ é:
+\begin{equation}
+f(x) =\begin{cases}
+\frac{1}{b-a}, a \le x \le b,\\
+0, c.c.
+\end{cases}
+\end{equation}
+
+e a sua função de distribuição $F(x)$:
+\begin{equation}
+F(x) =\begin{cases}
+0,&\mbox{se}\quad x \le a;\\
+\frac{x-a}{b-a},&\mbox{se}\quad a \le x \le b;\\
+1,&\mbox{se}\quad x \ge b.
+\end{cases}
+\end{equation}
+
+\textbf{\textit{Notação: }} \textit{$X \sim  U_{c}[a,b]$}, sendo que $a < b$.
+
+\textbf{\textit{Aplicações: }}A uniforme é muito utilizada em simulação de distribuições. A partir de uma uniforme posso gerar 
+outras distribuições de probabilidade. 
+
+<<uniforme, fig = T, echo = F>>=
+ x <- 0:10 
+ fx <- dunif(x, min = 2, max = 5) 
+ par(mfrow = c(1,2))
+ plot(x, fx, type = "l", ylab = "f(x)") 
+ title(main = "Uc(2,5)")
+ Fx <- punif(x, min = 2, max = 5) 
+ plot(x, Fx, type = "l", ylab = "F(x)") 
+ title(main = "Uc(2,5)")
+@
+
+\subsection{Modelo Exponencial}
+
+A v.a. $X$ segue o modelo $Exponencial$ de parâmetro $\lambda, \lambda > 0$, se tiver a sua função densidade de probabilidade $f(x)$
+dada por:
+\begin{equation}
+f(x) = \lambda e^{-\lambda x}I_{(0, \infty)}(x)
+\end{equation}
+
+e a sua função de distribuição $F(x)$:
+\begin{equation}
+F(x) = (1-e^{-\lambda x})I_{(0, \infty)}(x)
+\end{equation}
+
+\textbf{\textit{Notação: }} \textit{$X \sim  Exp(\lambda)$}.
+
+\textbf{\textit{Aplicações: }}O modelo exponencial é um modelo com aplicação em diversas áreas de engenharia e matemática. 
+Tempo de vida de equipamentos, intervalos entre chegadas de mensagens eletrônicas ou de chamadas telefônicas a uma central, são 
+algumas das quantidades que tem sido bem modeladas com essa distribuição. Boas propriedades matemáticas e suas relações com outros modelos são,
+também, atrativos no uso da $Exponencial$. Em particular, a importante propriedade, conhecida como \textit{falta de memória}, 
+presente, também, no modelo discreto, a distribuição \textit{Geométrica}.
+
+<<Exponencial, fig = T, echo = F>>=
+ x <- seq(0,10,0.01) 
+ fx <- dexp(x, 2) 
+ par(mfrow = c(1,2))
+ plot(x, fx, type = "l", ylab = "f(x)", main = "Exp(2)") 
+ Fx <- pexp(x, 2) 
+ plot(x, Fx, type = "l", ylab = "F(x)", main = "Exp(2)") 
+@
+
+<<ChangeExponencial, fig = T, echo = F>>=
+curve(dexp(x,1), xlim=c(0,10), col='red', lwd=3, ylab = 'f(x)')
+curve(dexp(x,2), add=T, col='green', lwd=3)
+curve(dexp(x,3), add=T, col='blue', lwd=3)
+curve(dexp(x,5), add=T, col='orange', lwd=3)
+curve(dexp(x,100), add=T, col='purple', lwd=3)
+abline(h=0,lty=3)
+abline(v=0,lty=3)
+legend(par('usr')[2], par('usr')[4], xjust=1,
+       c(expression(lambda == 1), expression(lambda == 2), expression(lambda == 3), 
+       expression(lambda == 5), expression(lambda == 100)),
+       lwd=3,
+       lty=1,
+       col=c('red', 'green', 'blue', 'orange', 'purple')
+      )
+title(main='Distribuicoes Exponencial')
+@
+
+\newpage
+\subsection{Modelo Normal}
+O modelo Normal foi estabelecido, ao redor de 1733, pelo matemático francês Abraham De Moivre. Algumas vezes ele é também
+denominado modelo de Gauss ou de De Moivre.
+
+A v.a. $X$ segue o modelo $Normal$ se a sua função densidade de probabilidade $f(x)$ é a seguinte:
+
+\begin{equation}
+f(x) = \frac{1}{\sigma \sqrt{2\pi}}e^{\frac{x - \mu}{2 \sigma^2}}I_{(-\infty,\infty)}(x)
+\end{equation}
+
+Algumas propriedades da densidade da Normal podem ser, facilmente, observadas de seu gráfico:
+
+\begin{itemize}
+\item{$f(x)$ é simétrica em relação à $\mu$;}
+\item{$f(x) \to 0$ quando $x \to \pm \infty$;}
+\item{o valor máximo de $f(x)$ se dá para $x = \mu$;}
+\end{itemize}
+
+A sua função de distribuição $F(x)$ não tem uma forma fechada e, de fato, o cálculo da probabilidade com a densidade Normal 
+não pode ser feito pela integral, pois esta não possui primitiva. Assim, valores de probabilidade são obtidos por integração numérica e 
+apresentados em tabela. Não é necessário fazer uma tabela para cada par de valores dos parâmetros em que se tenha interesse. Basta, apenas,
+tabelar as probabilidades para $\mu = 0$ e $\sigma^2 = 1$ e, assim, temos a distribuição $N(0,1)$. Mais formalmente,\\
+
+Sendo $X \sim N(\mu,\sigma^2)$, então, $Z = \frac{X - \mu}{\sigma^2}$ terá distribuição $N(0,1)$.\\
+
+\textbf{\textit{Notação: }} \textit{$X \sim  N(\mu, \sigma^2)$}. Imediatamente, $E(X) = \mu$ e $Var(X) = \sigma^2$, sendo 
+$\mu$ e $\sigma^2$ os parâmetros de locação e escala, respectivamente.
+
+\textbf{\textit{Aplicações: }}A importância da distribuição Normal em Estatística é muito grande. Ela serve como modelo para quantidades de
+interesse em Inferência Estatística e, também, é usada em aproximações. Sua densidade é simétrica ao redor de $\mu$ (que é a média da 
+variável) e vai diminuindo a massa de probabilidade, à medida que seus valores se movem para as extremidades. Dessa forma, o 
+modelo Normal poderia ser adequado para várias quantidades envolvendo medidas populacionais tais como peso, altura, dosagem de substâncias
+no sangue, entre outras. 
+
+Além de ser muito utilizada em experimentação agronômica na avaliação de cultivares e cálculo de \textit{breeding values} nos programas de
+melhoramento genéticos de cana-de-açúcar.
+
+<<Normal, fig = T, echo = F>>=
+ x <- seq(-5,5,0.05) 
+ fx <- dnorm(x) 
+ par(mfrow = c(1,2))
+ plot(x, fx, type = "l", ylab = "f(x)", main = "N(0,1)") 
+ Fx <- pnorm(x) 
+ plot(x, Fx, type = "l", ylab = "F(x)", main = "N(0,1)") 
+@
+
+<<ChangeNormal, fig = T, echo = F>>=
+curve(dnorm(x), xlim=c(-5,5), ylim=c(0,0.9), col='red', lwd=3, ylab = 'f(x)')
+curve(dnorm(x,mean=2), add=T, col='green', lwd=3)
+curve(dnorm(x,sd=3), add=T, col='blue', lwd=3)
+curve(dnorm(x,sd=100), add=T, col='orange', lwd=3)
+curve(dnorm(x,mean = 2, sd=0.5), add=T, col='purple', lwd=3)
+abline(h=0,lty=3)
+abline(v=0,lty=3)
+legend('topleft', xjust=1,
+       c('N(0,1)', 'N(2,1)', 'N(0,9)', 'N(0,10000)', 'N(2,0.25)'),
+       lwd=3,
+       lty=1,
+       col=c('red', 'green', 'blue', 'orange', 'purple')
+      )
+title(main='Distribuicoes Normal')
+@
+
+\subsection{Modelo Log-Normal}
+
+O modelo log-normal é indicado quando o logaritmo de uma v.a. segue uma distribuição normal nos parâmetros $\mu$ e $\sigma$.
+Seja $Y = ln(X)$ com $ f(y)$,
+
+\begin{equation}
+f(y) = \frac{1}{\sigma \sqrt{2\pi}}e^{\frac{y - \mu}{2 \sigma^2}}I_{(-\infty,\infty)}(y)
+\end{equation}
+
+Então, a v.a. $X$ segue o modelo $Log-Normal$ de parâmetros $(\mu, \sigma)$ se a sua função densidade de probabilidade $f(x)$ é dada por:
+
+\begin{equation}
+f(x) = \frac{1}{x \sigma \sqrt{2\pi}}e^{\frac{ln(x) - \mu}{2 \sigma^2}}I_{(0,\infty)}(x)
+\end{equation}
+
+onde $-\infty < \mu < \infty$ e $\sigma > 0$.
+
+A distribuição é assimétrica à direita e o grau de assimetria aumenta para valores crescentes de $\sigma$.
+
+\textbf{\textit{Notação: }} \textit{$X \sim  Log-Normal(\mu, \sigma^2)$}. Com $\mu$ e $\sigma^2$ sendo os parâmetros de forma e escala, 
+respectivamente e não parâmetros de posição e escala como na distribuição normal. $E(X) = e^{\mu + \frac{\sigma^2}{2}}$ e a 
+$Var(X) = (e^{\sigma^2}-1)e^{2\mu + \sigma^2}$.
+
+\textbf{\textit{Aplicações: }}O modelo Log-Normal tem sido utilizado em grande variedade de problemas práticos, tipicamente para processos
+em que o valor observado é uma proporção casual de um valor prévio. Por exemplo, a distribuição de rendas per capita, de heranças, 
+de depósitos bancários e a distribuição dos tamanhos dos organismos cujos crescimentos estejam sujeitos a muitos pequenos impulsos cujos 
+efeitos sejam proporcionais ao tamanho atual do organismo. Usa-se também a distribuição Log-Normal em geologia para representar tamanho 
+de partículas.
+
+<<Log-Normal, fig = T, echo = F>>=
+ x <- seq(0,10,0.01) 
+ fx <- dlnorm(x, meanlog = 0, sdlog = 1/2) 
+ par(mfrow = c(1,2))
+ plot(x, fx, type = "l", ylab = "f(x)", main = "Log-Normal(0, 1/4)") 
+ Fx <- plnorm(x, meanlog = 0, sdlog = 1/2)  
+ plot(x, Fx, type = "l", ylab = "F(x)", main = "Log-Normal(0, 1/4)") 
+@
+
+<<ChangeLog-Normal, fig = T, echo = F>>=
+curve(dlnorm(x, meanlog = 0, sdlog = 1), xlim=c(0,10), col='red', lwd=3, ylab = 'f(x)', ylim = c(0,1.1))
+curve(dlnorm(x, meanlog = 0, sdlog = 0.4), add=T, col='green', lwd=3)
+curve(dlnorm(x, meanlog = 0, sdlog = 2), add=T, col='blue', lwd=3)
+curve(dlnorm(x, meanlog = 0.3, sdlog = 1), add=T, col='orange', lwd=3)
+curve(dlnorm(x, meanlog = 1, sdlog = 1), add=T, col='purple', lwd=3)
+abline(h=0,lty=3)
+abline(v=0,lty=3)
+legend('topright', xjust=1,
+       c(expression(Log-Normal(mu == 0, sigma^2 == 1)),
+       expression(Log-Normal(mu == 0, sigma^2 == 0.16)), 
+       expression(Log-Normal(mu == 0, sigma^2 == 4)), 
+       expression(Log-Normal(mu == 0.3, sigma^2 == 1)), 
+       expression(Log-Normal(mu == 1, sigma^2 == 1))),
+       lwd=3,
+       lty=1,
+       col=c('red', 'green', 'blue', 'orange', 'purple')
+      )
+title(main='Distribuicoes Log-Normal')
+@
+
+\subsection{Modelo Gama}
+
+A v.a. $X$ segue o modelo $Gama$ de parâmetros $(\alpha, \beta)$ com $\alpha, \beta > 0$, se tiver a sua função densidade de probabilidade 
+$f(x)$ dada por:
+\begin{equation}
+f(x) = \frac{\beta^\alpha}{\Gamma(\alpha)}x^{\alpha-1}e^{-\beta x}I_{(0,\infty)}(x)
+\end{equation}
+
+onde\\
+
+\begin{equation}
+\Gamma(\alpha) = \int_0^\infty x^{\alpha-1}e^{-x}\,dx, \alpha > 0.
+\end{equation}
+
+Exceto em situações especiais, a função de distribuição do modelo Gama não tem uma forma simples e compacta. Dependendo dos valores 
+dos parâmetros, o modelo Gama recebe outros nomes e a tabela abaixo resume os casos principais.
+
+\begin{center}
+\begin{tabular}{||c|c|c||}
+ \hline
+	\textbf{Parâmetros} &\textbf{Nome Especial} &\textbf{Notação}\\
+ \hline
+	$\alpha = 1, \beta = 0$ &Exponencial &$Exp(\beta)$\\
+ \hline
+	$\alpha  = \frac{n}{2}, n > 0$ inteiro, $\beta = \frac{1}{2}$ &Qui-quadrado com $n$ graus de liberdade &$\chi^2(n)$\\
+ \hline
+	$\alpha  = k, k > 0$ inteiro, $\beta > 0$ &Erlang de ordem $k$ &$Erl_{k}(\beta)$\\
+ \hline
+\end{tabular}
+\end{center}
+
+\textbf{\textit{Notação: }} \textit{$X \sim  Gama(\alpha, \beta)$}. Com $\alpha$ e $\beta$ sendo os parâmetros de forma e escala, 
+respectivamente e, sendo a $E(X) = \frac{\alpha}{\beta}$ e a $Var(X) = \frac{\alpha}{\beta^2}$.
+
+\textbf{\textit{Aplicações: }}O modelo Gama é o modelo adequado para o tempo necessário para que um total de, exatamente, 
+$\alpha$ eventos independentes ocorram, se os eventos ocorrem a uma razão constante, $\beta$ . Isso sugere numerosas aplicações. Por exemplo,
+o tempo até a falha num sistema se a falha ocorre logo que exatamente $\alpha$ sub-falhas tenham ocorrido e se as sub-falhas ocorrem 
+independentemente e a uma razão constante, $\beta$. O modelo Gama também tem um papel importante na teoria das filas além de suas relações
+outros modelos probabilísticos.
+
+
+
+<<Gama, fig = T, echo = F>>=
+ x <- seq(0,10,0.01) 
+ fx <- dgamma(x, shape = 2, scale = 1/2) 
+ par(mfrow = c(1,2))
+ plot(x, fx, type = "l", ylab = "f(x)", main = "Gama(2, 2)") 
+ Fx <- pgamma(x, shape = 2, scale = 1/2)  
+ plot(x, Fx, type = "l", ylab = "F(x)", main = "Gama(2, 2)") 
+@
+
+<<ChangeGama, fig = T, echo = F>>=
+curve(dgamma(x, shape = 2, scale = 1/2), xlim=c(0,10), col='red', lwd=3, ylab = 'f(x)')
+curve(dgamma(x, shape = 2, scale = 1), add=T, col='green', lwd=3)
+curve(dgamma(x, shape = 4, scale = 1/2), add=T, col='blue', lwd=3)
+curve(dgamma(x, shape = 4, scale = 1), add=T, col='orange', lwd=3)
+curve(dgamma(x, shape = 3, scale = 2), add=T, col='purple', lwd=3)
+abline(h=0,lty=3)
+abline(v=0,lty=3)
+legend('topright', xjust=1,
+       c(expression(Gama(alpha == 2, beta == 2)), expression(Gama(alpha == 2, beta == 1)), expression(Gama(alpha == 4, beta == 2)), 
+       expression(Gama(alpha == 4, beta == 1)), expression(Gama(alpha == 3, beta == 1/2))),
+       lwd=3,
+       lty=1,
+       col=c('red', 'green', 'blue', 'orange', 'purple')
+      )
+title(main='Distribuicoes Gama')
+@
+
+\subsection{Modelo Weibull}
+
+A distribuição Weibull foi proposta originalmente por Weibull (1939) e sua ampla aplicabilidade foi também discutida por este mesmo autor
+(Weibull, 1951, 1954). 
+
+A v.a. $X$ segue o modelo $Weibull$ de parâmetros $(\gamma, \alpha)$ com $\gamma, \alpha > 0$, se tiver a sua função densidade de probabilidade 
+$f(x)$ dada por:
+\begin{equation}
+f(x) = \frac{\gamma}{\alpha^\gamma}x^{\gamma-1}e^{-(\frac{x}{\alpha})^\gamma}I_{(0,\infty)}(x)
+\end{equation}
+
+e a sua função de distribuição $F(x)$ é dada por:
+\begin{equation}
+F(x) = 1-e^{-(\frac{x}{\alpha})^\gamma}I_{(0,\infty)}(x)
+\end{equation}
+
+\textbf{\textit{Notação: }} \textit{$X \sim  Weibull(\gamma, \alpha)$}. Com $\gamma$ e $\alpha$ sendo os parâmetros de forma e escala, 
+respectivamente. Com $E(X) = \alpha \Gamma[1+(1/\gamma)]$ e a $Var(X) = \alpha^2[\Gamma[1+(2/\gamma)] - \Gamma[1+(1/\gamma)]^2]$.
+
+\textbf{\textit{Aplicações: }} O modelo Weibull vem sendo frequentemente usado em estudos biomédicos e industriais. A sua popularidade em 
+aplicações práticas se deve ao fato dela apresentar uma grande variedade de formas, todas com uma propriedade básica: a sua função de taxa
+de falha (função de risco) é monótona, isto é, ela é crescente, decrescente ou constante. A sua taxa de falha ou função de risco, $h(x)$,
+é dada por:
+
+\begin{equation}
+h(x) = \frac{\gamma}{\alpha^\gamma}x^{\gamma - 1}I_{(0,\infty)}(x, \alpha, \gamma)
+\end{equation}
+
+Ela vem sendo utilizada cada vez mais em análise de sobrevivência e confiabilidade (análise de falhas), na teoria do valor extremo, na previsão de 
+clima (velocidade do vento), problemas de hidrologia, engenharia de sistemas de comunicação, estimação do preço do lote urbano, 
+em seguros gerais para modelar o tamanho das reivindicações de resseguros, entre outras aplicações. Ela possui relações com outras 
+distribuições, como, por exemplo, a Exponencial e a Rayleigh.
+
+<<Weibull, fig = T, echo = F>>=
+ x <- seq(0,5,0.001) 
+ fx <- dweibull(x, shape = 1, scale = 2) 
+ par(mfrow = c(1,2))
+ plot(x, fx, type = "l", ylab = "f(x)", main = "Weibull(1, 2)") 
+ Fx <- pweibull(x, shape = 1, scale = 2)  
+ plot(x, Fx, type = "l", ylab = "F(x)", main = "Weibull(1, 2)") 
+@
+
+<<ChangeWeibull, fig = T, echo = F>>=
+x = seq(0, 5, 0.01)
+curve(dweibull(x, shape = 1, scale = 1), xlim=c(0,5), col='red', lwd=3, ylab = 'f(x)', ylim = c(-0.1,2))
+curve(dweibull(x, shape = 4, scale = 1), add=T, col='green', lwd=3)
+curve(dweibull(x, shape = 2, scale = 1), add=T, col='blue', lwd=3)
+curve(dweibull(x, shape = 1, scale = 5), add=T, col='orange', lwd=3)
+curve(dweibull(x, shape = 1/2, scale = 1), add=T, col='purple', lwd=3)
+abline(h=0,lty=3)
+abline(v=0,lty=3)
+legend('topright', xjust=1,
+       c(expression(Weibull(gamma == 1, alpha == 1)), 
+       expression(Weibull(gamma == 4, alpha == 1)), 
+       expression(Weibull(gamma == 2, alpha == 1)), 
+       expression(Weibull(gamma == 1, alpha == 5)), 
+       expression(Weibull(gamma == 1/2, alpha == 1))),
+       lwd=c(3,3,3,3,3),
+       lty=1,
+       col=c('red', 'green', 'blue', 'orange', 'purple')
+      )
+title(main='Distribuicoes Weibull')
+@
+
+\subsection{Modelo Qui-Quadrado}
+
+A distribuição $\chi^2$ é um caso especial da distribuição de probabilidade Gama. A distribuição $\chi^2$ com $k$ graus 
+de liberdade é a distribuição de uma soma dos quadrados de $k$ v.a. normais padrão independentes.
+
+Suponha que $Z_{i} \sim N(0,1), i = 1, \cdots, k$, Então a soma de quadrados dela:
+
+$$
+Q = \sum_{i=1}^k Z_{i}^2
+$$
+tem a distribuição $\chi^2$ com $k$ graus de liberdade.
+
+A v.a. $X$ segue o modelo de $\chi^2$ se a sua função densidade de probabilidade $f(x)$ é a seguinte:
+
+\begin{equation}
+f(x) = \frac{1}{2^{k/2 \Gamma(k/2)}} x^{k/2-1}e^{-x/2}I_{(0,\infty)}(x)
+\end{equation}
+
+onde $k > 0$ é um número inteiro positivo e especifica o número de graus de liberdade e $\Gamma(k/2)$ é a função Gama, que tem uma fórmula 
+fechada.
+
+E a sua função de distribuição $F(x)$:
+\begin{equation}
+F(x) = P(k/2, x/2)
+\end{equation}
+
+onde $P$ é a função Gama regularizada.\\
+
+\textbf{\textit{Notação: }} \textit{$X \sim  \chi^2(k)$}. $E(X) = k$ e $Var(X) = 2k$.
+
+\textbf{\textit{Aplicações: }}O teste de $\chi^2$ é usado para verificar qualidade do ajuste de uma distribuição observada em relação
+a uma teórica. Usada para testar a independência de dois critérios de classificação de dados qualitativos e construção de intervalos de confiança.
+A análise de variância de postos é um teste não paramétrico e usa a distribuição $\chi^2$.
+
+
+<<ChangeChiSquare, fig = T, echo = F>>=
+ x <- seq(0,10,0.01)
+curve(dchisq(x, df = 1), xlim=c(0,10), col='red', lwd=3, ylab = 'f(x)', ylim = c(0,1))
+curve(dchisq(x, df = 2), add=T, col='green', lwd=3)
+curve(dchisq(x, df = 5), add=T, col='blue', lwd=3)
+curve(dchisq(x, df = 9), add=T, col='orange', lwd=3)
+curve(dchisq(x, df = 20), add=T, col='purple', lwd=3)
+abline(h=0,lty=3)
+abline(v=0,lty=3)
+legend('topright', xjust=1,
+       c(expression(chi[(1)]^2), expression(chi[(2)]^2), expression(chi[(5)]^2), 
+       expression(chi[(9)]^2), expression(chi[(20)]^2)),
+       lwd=3,
+       lty=1,
+       col=c('red', 'green', 'blue', 'orange', 'purple')
+      )
+title(main='Distribuicoes Qui-Quadrado')
+@
+
+
+\subsection{Modelo t-Student}
+
+A distribuição $t-Student$ é uma distribuição de probabilidade estatística, publicada por um autor que se chamou de Student, 
+pseudônimo de William Sealy Gosset, que não podia usar seu nome verdadeiro para publicar trabalhos enquanto trabalhasse para a 
+cervejaria Guiness.
+
+A distribuição $t-Student$ é uma distribuição de probabilidade teórica. É simétrica e semelhante à curva normal padrão, porém com caudas mais largas,
+ou seja, uma simulação da $t-Student$ pode gerar valores mais extremos que uma simulação da normal. O único parâmetro $\nu$ que a define 
+e caracteriza a sua forma é o número de graus de liberdade. Quanto maior for esse parâmetro, mais próxima da normal ela será.
+
+Suponha que $Z \sim N(0,1)$, que $V \sim \chi^2(\nu)$, e que $Z$ e $V$ sejam independentes. Então:
+
+$$
+t = \frac{Z}{\sqrt{\frac{V}{\nu}}}
+$$
+tem a distribuição $t-Student$ com $\nu$ graus de liberdade.
+
+A v.a. $X$ segue o modelo de $t-Student$ se a sua função densidade de probabilidade $f(x)$ é a seguinte:
+
+\begin{equation}
+f(x) = \frac{\Gamma(\frac{\nu+1}{2})}{\sqrt{\nu \pi}\Gamma(\frac{\nu}{2}))}(1+\frac{x^2}{\nu})^\frac{-(\nu+1)}{2}I_{(-\infty,\infty)}(x)
+\end{equation}
+
+onde $\nu > 0$ é o número de graus de liberdade e $\Gamma$ é a função Gama.
+
+e a sua função de distribuição $F(x)$:
+\begin{equation}
+F(x) = \frac{1}{\sqrt{\nu}B(\frac{1}{2},\frac{\nu}{2})}(1+\frac{x^2}{\nu})^\frac{-(\nu+1)}{2}I_{(-\infty,\infty)}(x)
+\end{equation}
+
+onde $B$ é a função Beta.
+
+\textbf{\textit{Notação: }} \textit{$X \sim  t-Student(\nu)$}. 
+
+\begin{equation}
+E(x) =\begin{cases}
+0,&\mbox{para}\quad \nu > 1\\
+indefinido,&\mbox{c.c}\quad.
+\end{cases}
+\end{equation}
+
+\begin{equation}
+Var(x) =\begin{cases}
+\frac{\nu}{\nu-2},&\mbox{para}\quad \nu > 2\\
+\infty,&\mbox{para}\quad 1 < \nu \le 2\\
+indefinido,&\mbox{c.c}\quad.
+\end{cases}
+\end{equation}
+
+\textbf{\textit{Aplicações: }}Muito utilizada na inferência estatística, por exemplo, testar se a média populacional é igual a um
+valor especificado $\mu_0$, testar se a média difere significativamente entre as amostras pareadas ou amostras independentes, 
+testar se a inclinação da reta de regressão difere significativamente de zero.
+
+
+<<ChangetStudent, fig = T, echo = F>>=
+ x <- seq(-5,5,0.01)
+curve(dt(x, df = 1), xlim=c(-7,7), col='red', lwd=3, ylab = 'f(x)', ylim = c(0,0.45))
+curve(dt(x, df = 2), add=T, col='green', lwd=3)
+curve(dt(x, df = 5), add=T, col='blue', lwd=3)
+curve(dt(x, df = 1000), add=T, col='orange', lwd=3)
+curve(dnorm(x, mean = 0, sd = 1), add=T, col='purple', lwd=3)
+abline(h=0,lty=3)
+abline(v=0,lty=3)
+legend('topright', xjust=1,
+       c('t-Student(gl=1)', 't-Student(gl=2)', 't-Student(gl=5)', 
+       't-Student(gl=1000)', 'N(0,1)'),
+       lwd=3,
+       lty=1,
+       col=c('red', 'green', 'blue', 'orange', 'purple')
+      )
+title(main='Distribuicoes t-Student')
+@
+
+\subsection{Modelo F-Snedecor}
+
+A distribuição $F$ é também conhecida $F-Snedecor$ ou distribuição $Fisher-Snedecor$. Ela é definida como a razão entre duas v.a. $\chi^2$ 
+independentes.
+
+A v.a. $X$ segue o modelo de $F-Snedecor$ se a sua função densidade de probabilidade $f(x)$ é a seguinte:
+
+\begin{equation}
+f(x) = \frac{1}{B(\frac{d_1}{2},\frac{d_2}{2})} (\frac{d_1}{d_2})^{\frac{d_1}{2}} x^(\frac{d_1}{2}-1) (1 + \frac{d_1}{d_2}x)^\frac{-(d_1+d_2)}{2} I_{(0,\infty)}(x)
+\end{equation}
+
+onde $B$ é a função Beta e $d_1$ e $d_2$ são valores reais positivos.
+
+e a sua função de distribuição $F(x)$:
+\begin{equation}
+F(X) = I_{\frac{d_1 x}{d_1 x + d_2}}(d_1/2,d_2/2)
+\end{equation}
+
+onde $I$ é a função Beta regularizada incompleta.
+
+\textbf{\textit{Notação: }} \textit{$X \sim  F(d_1, d_2)$}. 
+
+\begin{equation}
+E(x) =\begin{cases}
+\frac{d_2}{d_2-2},&\mbox{para}\quad d_2 > 2.
+\end{cases}
+\end{equation}
+
+\begin{equation}
+Var(x) =\begin{cases}
+\frac{2d_2^2(d_1+d_2-2)}{d_1(d_2-2)^2(d_2-4)},&\mbox{para}\quad d_2 > 4.
+\end{cases}
+\end{equation}
+
+\textbf{\textit{Aplicações: }}A distribuição F surge frequentemente como a distribuição nula de uma estatistica de teste, principalmente na
+análise de variância, como, por exemplo, o teste F que testa a razão entre variâncias.
+
+<<ChangeFSnedecor, fig = T, echo = F>>=
+ x <- seq(0,10,0.01)
+curve(df(x, df1 = 1, df2 = 1), xlim=c(0,10), col='red', lwd=3, ylab = 'f(x)', ylim = c(0,2.1))
+curve(df(x, df1 = 2, df2 = 1), add=T, col='green', lwd=3)
+curve(df(x, df1 = 5, df2 = 2), add=T, col='blue', lwd=3)
+curve(df(x, df1 = 100, df2 = 1), add=T, col='orange', lwd=3)
+curve(df(x, df1 = 100, df2 = 100), add=T, col='purple', lwd=3)
+abline(h=0,lty=3)
+abline(v=0,lty=3)
+legend('topright', xjust=1,
+       c('F-Snedecor(1,1)', 'F-Snedecor(2,1)', 'F-Snedecor(5,2)', 
+       'F-Snedecor(100,1)', 'F-Snedecor(100,100)'),
+       lwd=3,
+       lty=1,
+       col=c('red', 'green', 'blue', 'orange', 'purple')
+      )
+title(main='Distribuicoes F-Snedecor')
+@
+
+\subsection{Modelo Beta}
+
+A distribuição Beta está definida entre o intervalo $(0,1)$ e está parametrizada por dois parâmetros de forma, denotados por $\alpha$ e $\beta$.
+
+A v.a. $X$ segue o modelo $Beta$ de parâmetros $(\alpha, \beta)$ com $\alpha, \beta > 0$, se tiver a sua função densidade de probabilidade 
+$f(x)$ dada por:
+\begin{equation}
+f(x) = \frac{1}{B(\alpha, \beta)}x^{\alpha-1}(1-x)^{\beta - 1}I_{(0,1)}(x)I_{(0, \infty)}(\alpha, \beta)
+\end{equation}
+
+onde $B(\alpha, \beta)$ é a função Beta. Ela aparece como uma constante de normalização para garantir que a probabilidade total integra a unidade.
+
+e a sua função de distribuição $F(x)$ é dada por:
+\begin{equation}
+F(x) = \frac{B_{x}(\alpha, \beta)}{B(\alpha, \beta)}I_{(0,1)}(x)I_{(0, \infty)}(\alpha, \beta)
+\end{equation}
+
+onde $B_{x}(\alpha, \beta)$ é a função Beta regularizada incompleta e $B(\alpha, \beta)$ é a função Beta.
+
+\textbf{\textit{Notação: }} \textit{$X \sim  Beta(\alpha, \beta)$}. Com $\alpha$ e $\beta$ sendo os dois parâmetros de forma. Com
+$E(X) = \frac{\alpha}{\alpha + \beta}$ e a $Var(X) = \frac{\alpha \beta}{(\alpha+\beta)^2(\alpha+\beta+1)}$.
+
+\textbf{\textit{Aplicações: }}O modelo Beta é utilizado na Análise de Investimentos em Situação de Risco (fluxos de caixa).
+Por causa do seu domínio (0,1) é apropriada para modelar proporções, como, por exemplo, para estudar a proporção de unidades defeituosas 
+de uma linha de produção.  Ela é bastante utilizada devido à variedade de formas que a densidade pode assumir de acordo com os 
+valores especificados de $\alpha$ e $\beta$.
+
+<<Beta, fig = T, echo = F>>=
+ x <- seq(0,1,0.001) 
+ fx <- dbeta(x, shape1 = 2, shape2 = 2) 
+ par(mfrow = c(1,2))
+ plot(x, fx, type = "l", ylab = "f(x)", main = "Beta(2, 2)") 
+ Fx <- pbeta(x, shape1 = 2, shape2 = 2)  
+ plot(x, Fx, type = "l", ylab = "F(x)", main = "Beta(2, 2)") 
+@
+
+<<ChangeBeta, fig = T, echo = F>>=
+curve(dbeta(x, shape1 = 1, shape2 = 1), xlim=c(-0.1,1.1), col='red', lwd=3, ylab = 'f(x)', ylim = c(0,5.5))
+curve(dbeta(x, shape1 = 2, shape2 = 2), add=T, col='green', lwd=3)
+curve(dbeta(x, shape1 = 5, shape2 = 2), add=T, col='blue', lwd=3)
+curve(dbeta(x, shape1 = 0.5, shape2 = 0.5), add=T, col='orange', lwd=2)
+curve(dbeta(x, shape1 = 10, shape2 = 10), add=T, col='purple', lwd=3)
+abline(h=0,lty=3)
+abline(v=0,lty=3)
+legend('topright', xjust=1,
+       c(expression(Beta(alpha == 1, beta == 1)), expression(Beta(alpha == 2, beta == 2)), expression(Beta(alpha == 5, beta == 2)), 
+       expression(Beta(alpha == 0.5, beta == 0.5)), expression(Beta(alpha == 10, beta == 10))),
+       lwd=c(3,3,3,2,3),
+       lty=1,
+       col=c('red', 'green', 'blue', 'orange', 'purple')
+      )
+title(main='Distribuicoes Beta')
+@
+
+\subsection{Modelo Erlang}
+
+Na distribuição Gama, $\alpha$ pode assumir qualquer valor positivo, não obstante a formulação da distribuição Gama como tempo necessário
+para que $\alpha$ eventos ocorram implica que $\alpha$ é um inteiro positivo. Quando o parâmetro $\alpha$ está restrito aos inteiros
+positivos, a distribuição Gama tem recebido o nome de distribuição ERLANG, principalmente na teoria das filas.
+A distribuição de Erlang foi desenvolvida por A. K. Erlang durante um trabalho sobre engenharia de tráfego de telefone. 
+Ele examinou o número de chamadas telefônicas que deveriam ser feitas ao mesmo tempo pelos operadores das estações de comutação.
+A v.a. $X$ segue o modelo de $Erlang$ se a sua função densidade de probabilidade $f(x)$ é a seguinte:
+
+\begin{equation}
+f(x) = \frac{\lambda^k x^{k-1}e^{-\lambda x}}{(k-1)!}I_{(0,\infty)}(x, \lambda)
+\end{equation}
+
+e a sua função de distribuição $F(x)$:
+\begin{equation}
+F(x) = \frac{\gamma(k, \lambda^x)}{(k-1)!}I_{(0,\infty)}(x, \lambda)
+\end{equation}
+
+O parâmetro $k$ é o parâmetro de forma e $\lambda$ o parâmetro chamado taxa.
+
+\textbf{\textit{Notação: }} \textit{$X \sim  Erlang(k, \lambda)$}. $E(X) = \frac{k}{\lambda}$ e $Var(X) = \frac{k}{\lambda^2}$.
+
+\textbf{\textit{Aplicações: }}Bastante utilizada na teoria das filas e engenharia de tráfego.
+
+<<ChangeErlang, fig = T, echo = F>>=
+ x <- seq(0,10,0.01)
+curve(dgamma(x, shape = 1, scale = 2), xlim=c(0,10), col='red', lwd=3, ylab = 'f(x)')
+curve(dgamma(x, shape = 2, scale = 2), add=T, col='green', lwd=3)
+curve(dgamma(x, shape = 3, scale = 2), add=T, col='blue', lwd=3)
+curve(dgamma(x, shape = 5, scale = 1), add=T, col='orange', lwd=3)
+curve(dgamma(x, shape = 9, scale = 1/2), add=T, col='purple', lwd=3)
+abline(h=0,lty=3)
+abline(v=0,lty=3)
+legend('topright', xjust=1,
+       c(expression(Erlang(k == 1, lambda == 1/2)), expression(Erlang(k == 2, lambda == 1/2)), expression(Erlang(k == 3, lambda == 1/2)), 
+       expression(Erlang(k == 5, lambda == 1)), expression(Erlang(k == 9, lambda == 2))),
+       lwd=3,
+       lty=1,
+       col=c('red', 'green', 'blue', 'orange', 'purple')
+      )
+title(main='Distribuicoes Erlang')
+@
+\subsection{Modelo Cauchy}
+
+A distribuição de Cauchy, também conhecida como distribuição de Cauchy-Lorentz ou distribuição de Bowman é muito utilizada na física.
+
+
+A v.a. $X$ segue o modelo de $Cauchy$ se a sua função densidade de probabilidade $f(x)$ é a seguinte:
+
+\begin{equation}
+f(x) = \frac{1}{\pi}[\frac{\gamma}{(x-x_0)^2 + \gamma^2}]I_{(-\infty,\infty)}(x)
+\end{equation}
+
+e a sua função de distribuição $F(x)$:
+\begin{equation}
+F(x) = \frac{1}{\pi}arctan(\frac{x-x_0}{\gamma})+\frac{1}{2}I_{(-\infty,\infty)}(x)
+\end{equation}
+
+
+Temos que $x_0$ é o parâmetro de locação e $\gamma$ é o parâmetro de escala dessa distribuição.\\
+
+\textbf{\textit{Notação: }} \textit{$X \sim  Cauchy(x_0, \gamma)$}. Apesar da distribuição de Cauchy possuir, um centro, $x_0$, 
+evidente e dispersão sobre esse centro, essas características não podem ser descritas pelos costumeiros parâmetros. $E(X)$ e $Var(X)$.
+
+\textbf{\textit{Aplicações: }}A distribuição de Cauchy é muito conhecida pelos físicos. Os físicos a conhecem por distribuição de Lorentz,
+função de Lorentz ou distribuição Breit-Wigner. A Cauchy aparece em uma variedade de problemas relacionados com a desintegração atômica,
+problemas de espalhamento, processos de captura, intensidade de espectros e nos problemas de distribuiçõa de quocientes de v.a.
+
+<<Cauchy, fig = T, echo = F>>=
+ x <- seq(-5,5,0.01) 
+ fx <- dcauchy(x, location = 0, scale = 2) 
+ par(mfrow = c(1,2))
+ plot(x, fx, type = "l", ylab = "f(x)", main = "Cauchy(0, 2)") 
+ Fx <- pcauchy(x, location = 0, scale = 2)  
+ plot(x, Fx, type = "l", ylab = "F(x)", main = "Cauchy(0, 2)") 
+@
+
+<<ChangeCauchy, fig = T, echo = F>>=
+curve(dcauchy(x, location = 0, scale = 1), xlim=c(-5,5), col='red', lwd=3, ylab = 'f(x)', ylim = c(0,0.5))
+curve(dcauchy(x, location = 0, scale = 2), add=T, col='green', lwd=3)
+curve(dcauchy(x, location = 2, scale = 1), add=T, col='blue', lwd=3)
+curve(dcauchy(x, location = 2, scale = 2), add=T, col='orange', lwd=3)
+curve(dnorm(x, mean = 0, sd = 1), add=T, col='purple', lwd=3)
+abline(h=0,lty=3)
+abline(v=0,lty=3)
+legend('topright', xjust=1,
+       c(expression(Cauchy(mu == 0, gamma == 1)), expression(Cauchy(mu == 0, gamma == 2)), expression(Cauchy(mu == 2, gamma == 1)), 
+       expression(Cauchy(mu == 2, gamma == 2)), expression(N(mu == 0, sigma == 1))),
+       lwd=3,
+       lty=1,
+       col=c('red', 'green', 'blue', 'orange', 'purple')
+      )
+title(main='Distribuicoes Cauchy')
+@
+
+\subsection{Modelo Pareto}
+
+A distribuição de Pareto, em homenagem ao economista italiano Vilfredo Pareto, é uma poderosa lei de distribuição de probabilidade que
+coincide com social, científico, geofísico, atuarial, e muitos outros tipos de fenômenos observáveis. Fora do campo da economia 
+às vezes é referida como a distribuição de Bradford.
+
+A v.a. $X$ segue o modelo de $Pareto$ se a sua função densidade de probabilidade $f(x)$ é a seguinte:
+
+\begin{equation}
+f(x) =\begin{cases}
+\alpha\frac{x_m^\alpha}{x^{\alpha+1}},&\mbox{para}\quad x > x_m,\\
+0,&\mbox{para}\quad x < x_m.
+\end{cases}
+\end{equation}
+
+
+e a sua função de distribuição $F(x)$:
+\begin{equation}
+F(x) =\begin{cases}
+1-(\frac{x_m}{x})^\alpha,&\mbox{para}\quad x \ge x_m;\\
+0,&\mbox{para}\quad x < x_m.
+\end{cases}
+\end{equation}
+
+
+onde $x_m$ é o mínimo valor possível de X e $\alpha$ é um parâmetro positivo. A famíla de distribuições de Pareto é parametrizada
+por duas quantidades, $x_m$ e $\alpha$\\
+
+\textbf{\textit{Notação: }} \textit{$X \sim  Pareto(x_m, \alpha)$}. $E(X) = \frac{\alpha x_m}{\alpha-1}$ para $\alpha > 1$ e 
+$Var(X) = \frac{x_m^2\alpha}{(\alpha-1)^2(\alpha-2)}$ para $\alpha > 2$.
+
+\textbf{\textit{Aplicações: }}Alguns exemplos da aplicação da distribuição de Pareto: Frequências de palavras em textos mais longos,
+o tamanho dos assentamentos humanos (poucas cidades, muitas aldeias), distribuição de tamanho de arquivo de tráfego de Internet 
+que usa o protocolo TCP (muitos arquivos menores, alguns maiores), clusters de Bose-Einstein perto do zero absoluto,
+o valor das reservas de petróleo em campos de petróleo (alguns campos grandes, muitos campos pequenos),
+o retorno de preço padronizado em ações individuais, tamanho de partículas de areia, tamanho dos meteoritos,
+número de espécies por gênero (observe a subjetividade envolvida: A tendência para dividir um gênero em duas ou mais 
+aumenta com o número de espécies no mesmo), áreas queimadas nos incêndios florestais, entre outros.
+
+<<Pareto, fig = T, echo = F>>=
+require(VGAM)
+ x <- seq(1,10,0.01) 
+ fx <- dpareto(x, scale = 1, shape = 1, log = FALSE) 
+ par(mfrow = c(1,2))
+ plot(x, fx, type = "l", ylab = "f(x)", main = "Pareto(1, 1)") 
+ Fx <- ppareto(x, scale = 1, shape = 1, log = FALSE)  
+ plot(x, Fx, type = "l", ylab = "F(x)", main = "Pareto(1, 1)") 
+@
+
+<<ChangePareto, fig = T, echo = F>>=
+curve(dpareto(x, scale = 1, shape = 1), xlim=c(0,10), col='red', lwd=3, ylab = 'f(x)', ylim = c(0,1.5))
+curve(dpareto(x, scale = 1, shape = 2), add=T, col='green', lwd=3)
+curve(dpareto(x, scale = 2, shape = 1), add=T, col='blue', lwd=3)
+curve(dpareto(x, scale = 2, shape = 2), add=T, col='orange', lwd=3)
+abline(h=0,lty=3)
+abline(v=0,lty=3)
+legend('topright', xjust=1,
+       c(expression(Pareto(x[m] == 1, alpha == 1)), expression(Pareto(x[m] == 1, alpha == 2)), expression(Pareto(x[m] == 2, alpha == 1)), 
+       expression(Pareto(x[m] == 2, alpha == 2))),
+       lwd=3,
+       lty=1,
+       col=c('red', 'green', 'blue', 'orange')
+      )
+title(main='Distribuicoes Pareto')
+@
+
+
+\subsection{Modelo Rayleigh}
+
+A distribuição de Rayleigh é usada para representação da distribuição radial de erros no plano, quando, em cada eixo, os erros são 
+independentes e normalmente distribuídos com média zero e mesma variância, $\sigma^2$.
+
+Assim, se $Y_1$ e $Y_2$ são v.a. com distribuições normais $N(0,\sigma^2)$\\
+
+$$
+X = \sqrt{Y_{1}^2 + Y_{2}^2}
+$$ 
+$X$ segue o modelo de $Rayleigh$ se a sua função densidade de probabilidade $f(x)$ é a seguinte:
+
+\begin{equation}
+f(x) = \frac{x}{\sigma^2}e^{\frac{-x^2}{2\sigma^2}}I_{(0,\infty)}(x)
+\end{equation}
+
+e a sua função de distribuição $F(x)$:
+\begin{equation}
+F(x) = 1-e^{\frac{-x^2}{2\sigma^2}}I_{(0,\infty)}(x)
+\end{equation}
+
+
+Como se verifica, a $f(x)$ dessa distribuição depende apenas de um parâmetro de escala, $\sigma$.\\
+
+\textbf{\textit{Notação: }} \textit{$X \sim  Rayleigh(\sigma)$}. $E(X) = \sigma\sqrt{\frac{\pi}{2}}$ e $Var(X) = \frac{4-\pi}{2}\sigma^2$.
+
+\textbf{\textit{Aplicações: }}Um exemplo onde a distribuição Rayleigh surge naturalmente é quando a velocidade do vento é analisada 
+em componentes ortogonais bi-dimensionais. Assumindo que a magnitude de cada componente são correlacionadas e normalmente 
+distribuídas com variância igual, então a velocidade do vento em geral (vetor magnitude) será caracterizada por uma distribuição de Rayleigh.
+Outra aplicação dessa distribuição relaciona-se com a determinação da distribuição da distância do ponto de impacto ao alvo para tiros cujos 
+erros nas direções X e Y, sejam independentes e normalmente distribuídos com média zero e mesma variância.
+
+\begin{thebibliography}{99}
+\bibitem{LivroProbMagalahes} Magalhães, M.N. {\textit{Probabilidade e Variáveis Aleatórias}}. 2ed., Edusp, São Paulo, Brasil, 2006. ISBN 85-314-0945-4. 
+\bibitem{notasProbPisani} Pisani, J.F. {\textit{Distribuições de Probabilidade}}. Notas técnicas n.4, Instituto de Ciências
+Matemáticas e Computação, USP, São Carlos, SP, Brasil, 1973.
+\bibitem{zoonekfree} Zoonekynd, V. {\textit{Probability Distributions}}. 
+URL \href{http://zoonek2.free.fr/UNIX/48_R/07.html}{http://zoonek2.free.fr/UNIX/48\_R/07.html}. Última atualização
+em 06 de janeiro de 2007. 
+\bibitem{wikipedia} {\textit{Probability distribution}}. 
+URL \href{http://en.wikipedia.org/wiki/Probability\_Distributions}{http://en.wikipedia.org/wiki/Probability\_Distributions}. Última acesso
+em 31 de agosto de 2011. 
+\bibitem{R} R Development Core Team (2009). {\textit{R: A language and environment for statistical computing.}} R Foundation for Statistical Computing, Vienna,
+Austria. ISBN 3-900051-07-0, URL \href{http://www.R-project.org}{http://www.R-project.org}.
+\bibitem{Sweave} Leisch, F. {\textit{Sweave user manual}}. URL \href{https://stat.ethz.ch/R-manual/R-devel/library/utils/doc/Sweave.pdf}{https://stat.ethz.ch/R-manual/R-devel/library/utils/doc/Sweave.pdf}. Institut fur Statistik
+und Wahrscheinlichkeitstheorie, Technische Universitat Wien, Vienna, Austria, 2002. 
+
+\end{thebibliography}
+
+\end{document}
